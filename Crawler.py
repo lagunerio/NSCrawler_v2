@@ -4,9 +4,7 @@ import string
 import requests
 import pymysql
 from bs4 import BeautifulSoup
-from datetime import datetime
 from data import *
-import time
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -200,20 +198,12 @@ def GetUrls():
     return urls
 
 def main():
-    cur = time.time()
     for url in GetUrls():
-        pre = cur
-        cur = time.time()
-        print("===URL: {}s seconds===".format(cur-pre))
         html = requests.get(url, headers=headers).text
         soup = BeautifulSoup(html, 'html.parser')
         crawler = Crawler(soup)
         for item in crawler.items():
-            ESdb.updateItem(item)
-            pre = cur
-            cur = time.time()
-            print("---{}s seconds---".format(cur-pre))            
-        
+            ESdb.updateItem(item)         
 
 if __name__=="__main__":
     main()
