@@ -18,6 +18,7 @@ LAST_PAGE = 50
 URL_FILE_PATH = '/usr/ScrapyProject/data/urls.csv'
 
 # WEB ACCESS HEADERS; user-agent string
+useragents = ['','','','','']
 headers = {
     'User-Agent': ''
 }
