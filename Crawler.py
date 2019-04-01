@@ -3,6 +3,7 @@ import csv
 import string
 import requests
 import pymysql
+import random
 from bs4 import BeautifulSoup
 from data import *
 
@@ -199,6 +200,7 @@ def GetUrls():
 
 def main():
     for url in GetUrls():
+        headers['User-Agent'] = useragents[random.randrange(0,4)]  # use random user agent
         html = requests.get(url, headers=headers).text
         soup = BeautifulSoup(html, 'html.parser')
         crawler = Crawler(soup)
