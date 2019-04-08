@@ -86,51 +86,91 @@ class Crawler:
             namestring = ''
 
             # remove unicodes and make a list
-            transTable = string.maketrans("[](),/", "      ")            
-            namestring = namestring.translate(transTable)
+            namestring = self.item['productname']
+            for replaceword in "[]()+,_":
+                namestring = namestring.replace(replaceword, " ")
             namelist = namestring.split()
-            
+
             pids = [] # product number candidates
+            Keep = ''
             for name in namelist:
                 large = '' # converted 'name' to get brand id from database
+                korean = ''
+                candidate = ''
+                checker = 0
+
                 if len(name) < 2:
                     pass
                 elif len(name) > 2:
                     if ord(name[0]) == 54644 and ord(name[1]) == 50808:
                         name = name[2:]
-                checker = 0 
+                SlashToken = 0
                 for n in name:
+                    SlashToken += 1
                     code = ord(n)
-                    if (48 <= code and code <= 57) or (65 <= code and code <= 90): # if n is number or large alphabet
+                    if n == '-' or n == '/' or n == '.': # save these for candidate
+                        candidate += n
+                    elif 48 <= code and code <= 57: # if n is number
+                        candidate += n
+                    elif (33 <= code and code <= 47) or (58 <= code and code <= 64) or (91 <= code and code <= 96) or (123 <= code and code <= 126): # if n is special symbols, erase them
                         pass
-                    elif n == '-' or n == '(' or n == ')':
-                        pass
+                    elif 65 <= code and code <= 90: # if n is large alphabet
+                        large += n
+                        candidate += n
                     elif 97 <= code and code <= 122: # if n is small alphabet
                         code -= 32 # make it large
-                    else:
-                        checker += 1 # if word contains invalid type letter, add 1
-                    try:
                         large += chr(code)
-                    except:
-                        large += n
+                        candidate += chr(code)
+                    else: # In most cases, n is be korean
+                        korean += n
 
-                # get brandid and pids(product numbers)
+                # slash can be everywhere, so delete it except the ones in the middle of the candidate
+                candies = candidate.split('/')
+                candidate = 0
+                finalcandy = ''
+                for candy in candies:
+                    if candy==' ':
+                        pass
+                    else:
+                        finalcandy += str(candy)
+                        finalcandy += "/"
+                candidate = finalcandy[:-1] # erase last slash
+
+                # get brandid and productids(product numbers)
                 if len(large) > 1:
                     token = 0
-                    for ppap in MMdb.getBrandID(large):
-                        if ppap == 0 and checker == 0: # if name looks like product number, append to pids list
-                            pids.append(name)
+                    for ppap in MMdb.getBrandID_ENG(large):
                         if ppap == 1:
                             token += 1
+                            checker = 1
                         elif token == 1:
                             self.item['brand_id'] = ppap
+
+                # get brandid from korean words
+                if len(korean) > 0:
+                    token = 0
+                    for ppap in MMdb.getBrandID_KOR(korean):
+                        if ppap == 1:
+                            token += 1
+                            checker = 2
+                        elif token == 1:
+                            self.item['brand_id'] = ppap
+                else:
+                    if checker == 1:
+                        pass
+                    elif candidate=='/' or candidate=='ML' or candidate=='A' or candidate=='S' or candidate=='AS' or candidate=='A/S':
+                        pass
+                    elif checker == 2 and len(candidate)>0:
+                        pids.append(candidate)
+                    elif len(candidate) > 0 and not candidate in pids:
+                        pids.append(candidate)
 
             # convert pids(list) to productnumber(string)
             productnumber = ''
             for pid in pids:
-                productnumber += pid + "/"
+                productnumber += pid + ";"
             self.item['productnumber'] = productnumber[:-1]
-            
+
             yield self.item
             prev = self.item['data_expose_id']
             i += 1
@@ -192,7 +232,6 @@ def GetUrls():
     with open(URL_FILE_PATH, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
-
             for i in range(1, LAST_PAGE):
                 url = row[0] + str(i)
                 urls.append(url)
