@@ -58,7 +58,7 @@ class DBconnector:
                 yield answer[0][0]
                 yield answer[0][1]
             except Exception as err:
-                print ("getBrandID() Error: {}".format(err))
+                writeLog("getBrandID() Error: {}".format(err))
                 yield 0
 
     # update item to database
@@ -73,7 +73,7 @@ class DBconnector:
                 cursor.execute("INSERT INTO a_NaverShopping(data_expose_id, price, shippingfee, productname, category, seller, reviews, brand_id, productnumber) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);", values) # insert item to mysql
                 mysql.commit()                
             except Exception as err:
-                print str(item['data_expose_id']) + ("updateItem() Error: {}".format(err))
+                writeLog(str(item['data_expose_id']) + ("updateItem() Error: {}".format(err)))
 
     def getBrands(self):
         with self.mysql.cursor() as cursor:
@@ -82,7 +82,11 @@ class DBconnector:
                 result = cursor.fetchall()
                 return result
             except Exception as err:
-                print ("getBrandID() Error: {}".format(err))
+                writeLog("getBrandID() Error: {}".format(err))
+                
+def writeLog(log):
+    with open(LOG_FILE_PATH, 'w') as f:
+        f.write(str(datetime.datetime.now()) + "\t" + str(log))
 
 # mysql connection settings
 ESdb = DBconnector(ES_DBHOST, ES_USERID, ES_PASSWD, ES_DBNAME)
