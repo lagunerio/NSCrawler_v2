@@ -206,8 +206,9 @@ def main():
         soup = BeautifulSoup(html, 'html.parser')
         crawler = Crawler(soup)
         for item in crawler.items():
-            writeLog(item['data_expose_id'])
-            ESdb.updateItem(item)         
+            if not (item['data_expose_id']=='' or item['price']==''):
+                writeLog(item['data_expose_id'])
+                ESdb.updateItem(item)         
 
 if __name__=="__main__":
     main()
