@@ -200,10 +200,13 @@ def GetUrls():
 
 def main():
     for url in GetUrls():
+        writeLog(url)
+        writeLog(headers)
         html = requests.get(url, headers=headers).text
         soup = BeautifulSoup(html, 'html.parser')
         crawler = Crawler(soup)
         for item in crawler.items():
+            writeLog(item['data_expose_id'])
             ESdb.updateItem(item)         
 
 if __name__=="__main__":
