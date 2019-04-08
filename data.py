@@ -1,4 +1,5 @@
 import pymysql
+from fake_useragnet import UserAgent
 
 # ES SERVER MYSQL CONNECTION INFORMATION
 ES_DBHOST = ''
@@ -18,9 +19,9 @@ LAST_PAGE = 50
 URL_FILE_PATH = '/usr/ScrapyProject/data/urls.csv'
 
 # WEB ACCESS HEADERS; user-agent string
-useragents = ['','','','','']
+ua = UserAgent()
 headers = {
-    'User-Agent': ''
+    'User-Agent': ua.random
 }
 
 EMPTY_ITEM = {
