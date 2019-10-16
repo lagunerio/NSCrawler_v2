@@ -16,7 +16,7 @@ MM_DBNAME = ''
 # SET PARAMETERS
 LAST_PAGE = 50
 #LAST_ITEM = 50
-URL_FILE_PATH = '/usr/ScrapyProject/data/urls.csv'
+URL_FILE_PATH = ''
 
 # WEB ACCESS HEADERS; user-agent string
 ua = UserAgent()
